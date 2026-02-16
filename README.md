@@ -55,6 +55,15 @@ This starts the API and the UI; open `http://localhost:5173`.
 - **GET /expenses**  
   Query: `?category=Food&sort=date_desc` (both optional).
 
+## Deploy on Vercel
+
+1. Push this repo to GitHub (you already did).
+2. Go to [vercel.com](https://vercel.com) → **Add New** → **Project** → Import your repo (e.g. `Ayushy21/full-stack-Expense-Tracker-`).
+3. Leave **Root Directory** as the repo root. Vercel will use `vercel.json`: it builds the frontend and deploys the API under `/api`.
+4. Click **Deploy**. Your app will be live at `https://your-project.vercel.app`.
+
+**Note:** On Vercel, the API runs as serverless and SQLite uses `/tmp` (ephemeral). Data may not persist across deployments or cold starts. For persistent data, use a hosted DB (e.g. Vercel Postgres) later.
+
 ## Design decisions
 
 - **Money**: Stored as integer **paise** in the DB to avoid floating-point errors. API and UI use rupees; conversion at the boundary.
@@ -67,22 +76,25 @@ This starts the API and the UI; open `http://localhost:5173`.
 - **Timebox**: No auth, no multi-user. Single SQLite file is enough for a small personal tool.
 - **Tests**: No automated tests in this repo; would add API integration tests and a few React tests next.
 - **Summary view**: “Total per category” listed as nice-to-have; not implemented to keep scope small.
-- **Deployment**: No Docker or deploy config; README assumes local run. For production you’d add env-based config and a proper process manager.
+- **Deployment**: Vercel config included (`vercel.json` + `api/`); SQLite on Vercel is ephemeral. For production’d with persistent data, use a hosted database.
 
 ## Project structure
 
 ```
 femmmo/
-├── backend/          # Express API
+├── api/             # Vercel serverless: forwards /api/* to Express
+│   └── index.js
+├── backend/         # Express API
 │   ├── src/
-│   │   ├── index.js  # Routes, server
+│   │   ├── index.js # Routes, server (export app for Vercel)
 │   │   ├── expenses.js
-│   │   └── db.js     # SQLite setup
-│   └── data/        # expenses.db (created on first run)
+│   │   └── db.js    # SQLite (uses /tmp on Vercel)
+│   └── data/        # expenses.db (local only)
 ├── frontend/        # Vite + React
 │   └── src/
 │       ├── App.jsx
 │       └── main.jsx
+├── vercel.json      # Build + rewrites for Vercel
 ├── package.json     # Root scripts to run both
 └── README.md
 ```

@@ -4,8 +4,9 @@ import path from 'path';
 import fs from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = path.join(__dirname, '..', 'data');
-fs.mkdirSync(dataDir, { recursive: true });
+// On Vercel, only /tmp is writable; data is ephemeral per instance
+const dataDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, '..', 'data');
+if (!process.env.VERCEL) fs.mkdirSync(dataDir, { recursive: true });
 const dbPath = path.join(dataDir, 'expenses.db');
 
 const db = new Database(dbPath);

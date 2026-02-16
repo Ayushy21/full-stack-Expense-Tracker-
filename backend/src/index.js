@@ -58,6 +58,11 @@ app.get('/expenses', (req, res) => {
 // Health for deployment
 app.get('/health', (req, res) => res.json({ ok: true }));
 
-app.listen(PORT, () => {
-  console.log(`Expense API listening on http://localhost:${PORT}`);
-});
+// Only listen when run directly (not on Vercel serverless)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Expense API listening on http://localhost:${PORT}`);
+  });
+}
+
+export { app };

@@ -55,14 +55,24 @@ This starts the API and the UI; open `http://localhost:5173`.
 - **GET /expenses**  
   Query: `?category=Food&sort=date_desc` (both optional).
 
-## Deploy on Vercel
+## Deploy on Vercel (with MongoDB)
 
-1. Push this repo to GitHub (you already did).
-2. Go to [vercel.com](https://vercel.com) → **Add New** → **Project** → Import your repo (e.g. `Ayushy21/full-stack-Expense-Tracker-`).
-3. Leave **Root Directory** as the repo root. Vercel will use `vercel.json`: it builds the frontend and deploys the API under `/api`.
-4. Click **Deploy**. Your app will be live at `https://your-project.vercel.app`.
+1. **Create a MongoDB database** (free tier):
+   - Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) → Sign up / Log in.
+   - Create a **free cluster** (M0).
+   - Under **Database Access** → Add Database User (username + password).
+   - Under **Network Access** → Add IP Address → **Allow Access from Anywhere** (`0.0.0.0/0`) so Vercel can connect.
+   - Under **Database** → **Connect** → **Drivers** → copy the connection string (e.g. `mongodb+srv://user:pass@cluster.mongodb.net/`). Replace `<password>` with your user password. Optionally add a database name: `...mongodb.net/expense-tracker`.
 
-**Note:** On Vercel, the API uses an in-memory store (no native SQLite) so it runs reliably in serverless. Data is ephemeral and resets on cold starts. For persistent data, use a hosted DB (e.g. Vercel Postgres) later.
+2. **Deploy on Vercel:**
+   - Go to [vercel.com](https://vercel.com) → **Add New** → **Project** → Import your repo.
+   - Leave **Root Directory** as the repo root.
+   - Before deploying, go to **Settings** → **Environment Variables**. Add:
+     - **Name:** `MONGODB_URI`
+     - **Value:** your MongoDB connection string (e.g. `mongodb+srv://user:pass@cluster.mongodb.net/expense-tracker`)
+   - Click **Deploy**. Your app will be live at `https://your-project.vercel.app`.
+
+**Note:** If `MONGODB_URI` is not set on Vercel, the API falls back to an in-memory store (data is lost on cold starts). Setting `MONGODB_URI` gives you persistent storage with MongoDB.
 
 ## Design decisions
 

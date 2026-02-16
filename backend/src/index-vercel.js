@@ -1,15 +1,19 @@
 /**
- * Express app for Vercel serverless. Uses in-memory store (no native SQLite).
+ * Express app for Vercel serverless.
+ * Uses MongoDB when MONGODB_URI is set, otherwise in-memory store.
  */
 import express from 'express';
 import cors from 'cors';
-import { createExpense, listExpenses } from './expenses-memory.js';
+import { createExpense as createMongo, listExpenses as listMongo } from './expenses-mongo.js';
+import { createExpense as createMemory, listExpenses as listMemory } from './expenses-memory.js';
+
+const useMongo = Boolean(process.env.MONGODB_URI);
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post('/expenses', (req, res) => {
+app.post('/expenses', async (req, res) => {
   try {
     const { amount, category, description, date } = req.body;
     const idempotencyKey = req.get('Idempotency-Key') || undefined;
@@ -26,7 +30,8 @@ app.post('/expenses', (req, res) => {
       return res.status(400).json({ error: 'Amount must be a non-negative number' });
     }
 
-    const expense = createExpense(
+    const createExpense = useMongo ? createMongo : createMemory;
+    const expense = await createExpense(
       {
         amount: numAmount,
         category: String(category),
@@ -42,11 +47,12 @@ app.post('/expenses', (req, res) => {
   }
 });
 
-app.get('/expenses', (req, res) => {
+app.get('/expenses', async (req, res) => {
   try {
     const category = req.query.category;
     const sort = req.query.sort || 'date_desc';
-    const expenses = listExpenses({ category, sort });
+    const listExpenses = useMongo ? listMongo : listMemory;
+    const expenses = await listExpenses({ category, sort });
     res.json(expenses);
   } catch (err) {
     console.error('GET /expenses error:', err);

@@ -5,10 +5,5 @@
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api?path=$1" },
     { "source": "/api", "destination": "/api" }
-  ],
-  "functions": {
-    "api/index.js": {
-      "runtime": "vercel/node@20.x"
-    }
-  }
+  ]
 }

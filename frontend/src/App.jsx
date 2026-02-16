@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 
+// No .env needed: uses '/api' (proxied to backend locally, same-origin on Vercel)
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 const CATEGORIES = [

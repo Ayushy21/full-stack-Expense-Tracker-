@@ -62,7 +62,7 @@ This starts the API and the UI; open `http://localhost:5173`.
 3. Leave **Root Directory** as the repo root. Vercel will use `vercel.json`: it builds the frontend and deploys the API under `/api`.
 4. Click **Deploy**. Your app will be live at `https://your-project.vercel.app`.
 
-**Note:** On Vercel, the API runs as serverless and SQLite uses `/tmp` (ephemeral). Data may not persist across deployments or cold starts. For persistent data, use a hosted DB (e.g. Vercel Postgres) later.
+**Note:** On Vercel, the API uses an in-memory store (no native SQLite) so it runs reliably in serverless. Data is ephemeral and resets on cold starts. For persistent data, use a hosted DB (e.g. Vercel Postgres) later.
 
 ## Design decisions
 

@@ -1,4 +1,5 @@
-import { app } from '../backend/src/index.js';
+// Use in-memory store on Vercel (better-sqlite3 native module often fails in serverless)
+import { app } from '../backend/src/index-vercel.js';
 
 /**
  * Vercel serverless handler: forward all /api/* requests to Express.

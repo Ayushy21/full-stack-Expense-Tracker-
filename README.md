@@ -1,0 +1,88 @@
+# Expense Tracker
+
+A minimal full-stack personal expense tracker: backend API + simple web UI. Built for real-world conditions (retries, refreshes, slow/failed networks).
+
+## Features
+
+- **Create expenses**: amount, category, description, date
+- **List expenses**: with filter by category and sort by date (newest first)
+- **Total**: sum of currently visible expenses (after filter/sort)
+- **Idempotent POST**: safe retries and duplicate submits (uses `Idempotency-Key` header)
+- **Validation**: non-negative amount, required date; basic error and loading states in UI
+
+## Quick start
+
+### Prerequisites
+
+- Node.js 18+
+- npm (or yarn/pnpm)
+
+### Run backend
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+API runs at `http://localhost:3001`.
+
+### Run frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+UI runs at `http://localhost:5173` and proxies `/api` to the backend.
+
+### Run both (from repo root)
+
+```bash
+npm install
+npm run dev
+```
+
+This starts the API and the UI; open `http://localhost:5173`.
+
+## API
+
+- **POST /expenses**  
+  Body: `{ "amount": number, "category": string, "description": string, "date": "YYYY-MM-DD" }`  
+  Optional header: `Idempotency-Key: <unique-string>` for safe retries.
+
+- **GET /expenses**  
+  Query: `?category=Food&sort=date_desc` (both optional).
+
+## Design decisions
+
+- **Money**: Stored as integer **paise** in the DB to avoid floating-point errors. API and UI use rupees; conversion at the boundary.
+- **Persistence**: **SQLite** (file `backend/data/expenses.db`). No extra process, survives restarts, easy to backup and migrate later. Chosen over in-memory for realism and over a full RDBMS for simplicity.
+- **Idempotency**: Client sends `Idempotency-Key` (e.g. UUID) on POST. Server stores key → expense id; repeated same key returns the same expense (201) without creating a duplicate. Frontend generates one key per “logical” submit and keeps it until success, so refresh/retry is safe.
+- **Stack**: Express + better-sqlite3 (sync, simple). Frontend: React + Vite, minimal styling, focus on correctness and clarity.
+
+## Trade-offs / not done
+
+- **Timebox**: No auth, no multi-user. Single SQLite file is enough for a small personal tool.
+- **Tests**: No automated tests in this repo; would add API integration tests and a few React tests next.
+- **Summary view**: “Total per category” listed as nice-to-have; not implemented to keep scope small.
+- **Deployment**: No Docker or deploy config; README assumes local run. For production you’d add env-based config and a proper process manager.
+
+## Project structure
+
+```
+femmmo/
+├── backend/          # Express API
+│   ├── src/
+│   │   ├── index.js  # Routes, server
+│   │   ├── expenses.js
+│   │   └── db.js     # SQLite setup
+│   └── data/        # expenses.db (created on first run)
+├── frontend/        # Vite + React
+│   └── src/
+│       ├── App.jsx
+│       └── main.jsx
+├── package.json     # Root scripts to run both
+└── README.md
+```
